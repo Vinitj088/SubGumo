@@ -28,6 +28,7 @@ function TripForm({ onSubmit, initialData = {}, isEditing = false }) {
     total_seats: initialData.total_seats || '',
     booked_seats: initialData.booked_seats || '0', 
     badge: initialData.badge || '',
+    pdfUrl: initialData.pdfUrl || '', // Google Drive PDF URL
   });
 
   // Effect to populate form when initialData changes (for editing)
@@ -59,6 +60,7 @@ function TripForm({ onSubmit, initialData = {}, isEditing = false }) {
         total_seats: initialData.total_seats || '',
         booked_seats: initialData.booked_seats || '0', 
         badge: initialData.badge || '',
+        pdfUrl: initialData.pdfUrl || '', // Google Drive PDF URL
       });
     }
     // If adding (not editing), ensure default state is set (already handled by useState)
@@ -295,6 +297,13 @@ function TripForm({ onSubmit, initialData = {}, isEditing = false }) {
         <div className="md:col-span-2">
           <label htmlFor="gallery_images" className="block text-sm font-medium text-gray-700">Gallery Image URLs (comma-separated)</label>
           <textarea id="gallery_images" name="gallery_images" rows="3" value={formData.gallery_images} onChange={handleChange} placeholder="e.g., /images/gallery1.jpg, /images/gallery2.jpg" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
+        </div>
+        
+        {/* PDF URL Field */}
+        <div className="md:col-span-2">
+          <label htmlFor="pdfUrl" className="block text-sm font-medium text-gray-700">PDF URL (Google Drive link)</label>
+          <input type="url" id="pdfUrl" name="pdfUrl" value={formData.pdfUrl} onChange={handleChange} placeholder="https://drive.google.com/file/d/..." className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" />
+          <p className="mt-1 text-xs text-gray-500">Enter a shareable Google Drive link to the trip's PDF document</p>
         </div>
       </div>
 

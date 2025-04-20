@@ -76,7 +76,8 @@ function initDb() {
       booked_seats INTEGER DEFAULT 0, -- Seats already booked
       badge TEXT,             -- Badge text (e.g., 'New', 'Popular')
       maps_iframe TEXT,         -- Renamed from mapsIframe
-      itinerary_data TEXT       -- Store JSON string here
+      itinerary_data TEXT,      -- Store JSON string here
+      pdfUrl TEXT               -- URL to Google Drive PDF
     )`, (err) => {
       if (err) {
         console.error('Error creating trips table:', err.message);

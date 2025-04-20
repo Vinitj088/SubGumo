@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { MapPin, Star, Heart, Calendar, Check, Info, Sparkles, Trees, Utensils, Car, Wifi, Image as ImageIcon, ArrowLeft, Share2, Copy, Twitter, Facebook } from "lucide-react";
+import { MapPin, Star, Heart, Calendar, Check, Info, Sparkles, Trees, Utensils, Car, Wifi, Image as ImageIcon, ArrowLeft, Share2, Copy, Twitter, Facebook, Download } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 
 import {
@@ -429,19 +429,30 @@ export default function AboutDestination() {
             </div>
           </div>
 
-          {/* Fav Button */}
+          {/* Download PDF Button */}
           <Button
             variant="outline"
             size="sm"
             className="flex items-center gap-1.5 text-gray-700 border-gray-200"
-            onClick={() => setIsFavorite(!isFavorite)}
+            asChild={!!trip.pdfUrl}
+            disabled={!trip.pdfUrl}
           >
-            <Heart
-              className={`w-4 h-4 ${
-                isFavorite ? "fill-red-500 text-red-500" : ""
-              }`}
-            />
-            <span>{isFavorite ? "Saved" : "Save"}</span>
+            {trip.pdfUrl ? (
+              <a
+                href={trip.pdfUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download PDF</span>
+              </a>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <Download className="w-4 h-4" />
+                <span>PDF Unavailable</span>
+              </span>
+            )}
           </Button>
         </div>
 

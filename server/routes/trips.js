@@ -93,7 +93,7 @@ router.post('/', (req, res) => {
     description, maps_iframe, itinerary_data,
     // New fields
     rating, reviews_count, categories, features, gallery_images,
-    start_date, total_seats, booked_seats, badge
+    start_date, total_seats, booked_seats, badge, pdfUrl
   } = req.body;
 
   // Basic validation (add more as needed)
@@ -106,8 +106,8 @@ router.post('/', (req, res) => {
                  original_cost, cost, duration, is_upcoming, description,
                  rating, reviews_count, categories, features, gallery_images,
                  maps_iframe, itinerary_data,
-                 start_date, total_seats, booked_seats, badge
-               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                 start_date, total_seats, booked_seats, badge, pdfUrl
+               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
   
   // Stringify JSON fields for storage
   const itineraryJson = safeJsonStringify(itinerary_data, '[]');
@@ -121,7 +121,7 @@ router.post('/', (req, res) => {
     description,
     rating, reviews_count, categoriesJson, featuresJson, galleryImagesJson,
     maps_iframe, itineraryJson,
-    start_date, total_seats, booked_seats, badge
+    start_date, total_seats, booked_seats, badge, pdfUrl
   ];
 
   db.run(sql, params, function(err) { // Use function() to get access to this.lastID
@@ -143,7 +143,7 @@ router.put('/:id', (req, res) => {
     description, maps_iframe, itinerary_data,
     // New fields
     rating, reviews_count, categories, features, gallery_images,
-    start_date, total_seats, booked_seats, badge
+    start_date, total_seats, booked_seats, badge, pdfUrl
   } = req.body;
 
   // Basic validation
@@ -174,7 +174,8 @@ router.put('/:id', (req, res) => {
                  start_date = ?,
                  total_seats = ?,
                  booked_seats = ?,
-                 badge = ?
+                 badge = ?,
+                 pdfUrl = ?
                WHERE id = ?`;
 
   const itineraryJson = safeJsonStringify(itinerary_data, '[]');
@@ -188,7 +189,7 @@ router.put('/:id', (req, res) => {
     description,
     rating, reviews_count, categoriesJson, featuresJson, galleryImagesJson,
     maps_iframe, itineraryJson,
-    start_date, total_seats, booked_seats, badge,
+    start_date, total_seats, booked_seats, badge, pdfUrl,
     id // For the WHERE clause
   ];
 

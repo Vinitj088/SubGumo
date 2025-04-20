@@ -299,15 +299,15 @@ function AdminDashboardPage() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mb-6">
+      <div className="hidden sm:grid gap-4 md:grid-cols-2 lg:grid-cols-7 mb-6">
         <Card className="lg:col-span-4"> 
           <CardHeader>
             <CardTitle>Daily Inquiries (Last 7 Days)</CardTitle>
           </CardHeader>
-          <CardContent className="pl-2">
+          <CardContent className="px-2 sm:px-4"> {/* Added responsive padding */}
             {inquiriesLoading ? <p>Loading chart data...</p> : inquiriesError ? <p className="text-red-500">Error loading chart data.</p> : dailyInquiriesData.length === 0 ? <p>Not enough data.</p> : (
-              <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                <BarChart accessibilityLayer data={dailyInquiriesData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+              <ChartContainer config={chartConfig} className="min-h-[200px] max-w-full overflow-hidden"> {/* Added max-width and overflow control */}
+                <BarChart accessibilityLayer data={dailyInquiriesData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
                   <YAxis tickLine={false} axisLine={false} tickMargin={8} width={30} />
@@ -324,12 +324,12 @@ function AdminDashboardPage() {
           <CardHeader>
             <CardTitle>Most Popular Destinations (Top 5)</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-2 sm:px-4"> {/* Added responsive padding */}
             {inquiriesLoading ? <p>Loading chart data...</p> : inquiriesError ? <p className="text-red-500">Error loading chart data.</p> : popularDestinationsData.length === 0 ? <p>No inquiry data found.</p> : (
-              <ChartContainer config={chartConfig} className="min-h-[200px] w-full">
-                <BarChart accessibilityLayer data={popularDestinationsData} layout="vertical" margin={{ top: 5, right: 10, left: 5, bottom: 5 }}>
+              <ChartContainer config={chartConfig} className="min-h-[200px] max-w-full overflow-hidden"> {/* Added max-width and overflow control */}
+                <BarChart accessibilityLayer data={popularDestinationsData} layout="vertical" margin={{ top: 5, right: 20, left: 5, bottom: 5 }}>
                   <CartesianGrid horizontal={false} />
-                  <YAxis dataKey="name" type="category" tickLine={false} axisLine={false} tickMargin={8} className="text-xs" width={80} />
+                  <YAxis dataKey="name" type="category" tickLine={false} axisLine={false} tickMargin={8} className="text-[10px] sm:text-xs" width={120} /> {/* Increased width for labels and smaller text on mobile */}
                   <XAxis dataKey="count" type="number" hide />
                   <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel indicator="line" />} />
                   <Bar dataKey="count" layout="vertical" fill="var(--color-destinations)" radius={4}>
