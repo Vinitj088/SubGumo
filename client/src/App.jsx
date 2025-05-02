@@ -12,6 +12,7 @@ import AdminDashboardPage from "./pages/Admin/AdminDashboardPage";
 import ProtectedRoute from "./components/Auth/ProtectedRoute"; 
 import AddTripPage from "./pages/Admin/AddTripPage"; 
 import EditTripPage from "./pages/Admin/EditTripPage"; 
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function App() {
   return (
@@ -55,6 +56,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
           </Routes>
 
           <Footer />

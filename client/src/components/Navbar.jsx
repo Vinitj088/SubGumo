@@ -57,17 +57,16 @@ const NavbarLink = ({ navlink, active, className }) => {
 
 const SocialButton = ({ href, icon: Icon, color, label }) => (
   <Button
-    size="sm"
-    variant="ghost"
+    size="icon"
     className={cn(
-      "rounded-full w-9 h-9 p-0 transition-all hover:scale-105",
-      color === "green" && "text-green-600 hover:text-green-700 hover:bg-green-50",
-      color === "pink" && "text-pink-600 hover:text-pink-700 hover:bg-pink-50"
+      "rounded-full w-10 h-10 p-0 transition-all hover:scale-105 shadow-sm",
+      color === "green" && "bg-green-500 hover:bg-green-600 text-white",
+      color === "pink" && "bg-gradient-to-br from-purple-600 via-pink-600 to-orange-400 hover:from-purple-700 hover:via-pink-700 hover:to-orange-500 text-white"
     )}
     asChild
   >
     <a href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
-      <Icon className="h-5 w-5" />
+      <Icon className="h-7 w-7" />
     </a>
   </Button>
 );
@@ -143,7 +142,7 @@ const Navbar = () => {
           </Button>
           
           {/* Social Media Links */}
-          <div className="flex items-center space-x-1 ml-2 border-l pl-3 border-gray-200">
+          <div className="flex items-center space-x-2 ml-2 border-l pl-3 border-gray-200">
             <SocialButton
               href="https://wa.me/918239498447"
               icon={IoLogoWhatsapp}

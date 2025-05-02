@@ -48,36 +48,54 @@ function initDb() {
         console.error('Error creating inquiries table:', err.message);
       } else {
         console.log('Inquiries table checked/created.');
+        // Add is_completed column if it doesn't exist
+        db.all("PRAGMA table_info(inquiries)", (err, columns) => {
+          if (err) {
+            console.error("Error checking inquiries table columns:", err.message);
+            return;
+          }
+          const columnExists = columns.some(col => col.name === 'is_completed');
+          if (!columnExists) {
+            db.run("ALTER TABLE inquiries ADD COLUMN is_completed BOOLEAN DEFAULT 0", (alterErr) => {
+              if (alterErr) {
+                console.error("Error adding is_completed column to inquiries:", alterErr.message);
+              } else {
+                console.log("'is_completed' column added to inquiries table.");
+              }
+            });
+          } else {
+            console.log("'is_completed' column already exists in inquiries table.");
+          }
+        });
       }
     });
 
     // Create Trips table based on constants.js structure
     db.run(`CREATE TABLE IF NOT EXISTS trips (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
+      location_name TEXT NOT NULL,  -- Renamed from name
       distance TEXT,
-      card_img TEXT,            -- Renamed from Cardimg
-      info_img TEXT,            -- Renamed from img
+      card_img TEXT,           
+      info_img TEXT,           
       title TEXT NOT NULL,
-      card_subtitle TEXT,       -- Renamed from CardsubTitle
-      subtitle TEXT,            -- Renamed from subTitle
-      original_cost TEXT,       -- Storing as TEXT for simplicity
-      cost TEXT,                -- Storing as TEXT for simplicity
+      card_subtitle TEXT,      
+      subtitle TEXT,           
+      original_cost TEXT,      
+      cost TEXT,               
       duration TEXT,
-      is_upcoming INTEGER,      -- 0 for false, 1 for true
+      is_upcoming INTEGER,     
       description TEXT,
       rating REAL,
       reviews_count INTEGER,
-      categories TEXT,        -- Store JSON string or comma-separated
-      features TEXT,          -- Store JSON string 
-      gallery_images TEXT,    -- Store JSON string or comma-separated URLs
-      start_date TEXT,        -- Date trip starts (e.g., 'YYYY-MM-DD')
-      total_seats INTEGER,    -- Total available seats
-      booked_seats INTEGER DEFAULT 0, -- Seats already booked
-      badge TEXT,             -- Badge text (e.g., 'New', 'Popular')
-      maps_iframe TEXT,         -- Renamed from mapsIframe
-      itinerary_data TEXT,      -- Store JSON string here
-      pdfUrl TEXT               -- URL to Google Drive PDF
+      features TEXT,           -- Renamed from categories
+      -- gallery_images TEXT,  -- Removed
+      start_date TEXT,       
+      total_seats INTEGER,   
+      booked_seats INTEGER DEFAULT 0,
+      badge TEXT,            
+      maps_iframe TEXT,        
+      itinerary_data TEXT,     
+      pdfUrl TEXT              
     )`, (err) => {
       if (err) {
         console.error('Error creating trips table:', err.message);

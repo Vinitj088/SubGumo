@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('../database'); // Import the database connection
+const supabase = require('../supabase'); // Use Supabase instead of SQLite
 
 const router = express.Router();
 
@@ -30,196 +30,200 @@ const safeJsonStringify = (obj, defaultValue = '[]') => {
 // --- Trip CRUD Operations --- 
 
 // GET /api/trips - Get all trips
-router.get('/', (req, res) => {
-  // Select new fields and calculate remaining seats
-  const sql = `
-    SELECT *, 
-           (total_seats - booked_seats) AS remaining_seats 
-    FROM trips 
-    ORDER BY id DESC`;
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      console.error('Error fetching trips:', err.message);
-      return res.status(500).json({ message: 'Error fetching trips' });
-    }
-    // Parse JSON string fields back to objects/arrays
-    const trips = rows.map(trip => ({
+router.get('/', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('trips')
+      .select('*')
+      .order('id', { ascending: false });
+    
+    if (error) throw error;
+
+    // Process trips (no need to parse JSON as Supabase returns parsed JSON for JSONB columns)
+    const trips = data.map(trip => ({
       ...trip,
-      itinerary_data: safeJsonParse(trip.itinerary_data, []),
-      categories: safeJsonParse(trip.categories, []),
-      features: safeJsonParse(trip.features, []),
-      gallery_images: safeJsonParse(trip.gallery_images, [])
+      // Calculate remaining seats
+      remaining_seats: trip.total_seats - trip.booked_seats,
+      // Convert boolean for consistency with frontend
+      is_upcoming: !!trip.is_upcoming
     }));
+    
     res.status(200).json(trips);
-  });
+  } catch (err) {
+    console.error('Error fetching trips:', err.message);
+    res.status(500).json({ message: 'Error fetching trips' });
+  }
 });
 
 // GET /api/trips/:id - Get a single trip by ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   const { id } = req.params;
-  // Select new fields and calculate remaining seats for a single trip
-  const sql = `
-    SELECT *, 
-           (total_seats - booked_seats) AS remaining_seats 
-    FROM trips 
-    WHERE id = ?`;
-  const params = [id];
-  db.get(sql, params, (err, row) => {
-    if (err) {
-      console.error(`Error fetching trip ${id}:`, err.message);
-      return res.status(500).json({ message: 'Error fetching trip' });
+  try {
+    const { data, error } = await supabase
+      .from('trips')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ message: 'Trip not found' });
+      }
+      throw error;
     }
-    if (!row) {
-      return res.status(404).json({ message: 'Trip not found' });
-    }
-    // Parse itinerary_data and other JSON fields
+    
+    // Add remaining seats calculation
     const trip = {
-        ...row,
-        itinerary_data: safeJsonParse(row.itinerary_data, []),
-        categories: safeJsonParse(row.categories, []),
-        features: safeJsonParse(row.features, []),
-        gallery_images: safeJsonParse(row.gallery_images, [])
+      ...data,
+      remaining_seats: data.total_seats - data.booked_seats,
+      is_upcoming: !!data.is_upcoming
     };
+    
     res.status(200).json(trip);
-  });
+  } catch (err) {
+    console.error(`Error fetching trip ${id}:`, err.message);
+    res.status(500).json({ message: 'Error fetching trip' });
+  }
 });
 
 // POST /api/trips - Create a new trip
-router.post('/', (req, res) => {
-  // Extract data from request body - ensure all required fields are present
+router.post('/', async (req, res) => {
+  // Extract data from request body
   const {
-    name, distance, card_img, info_img, title, card_subtitle,
+    location_name, distance, card_img, info_img, title, card_subtitle,
     subtitle, original_cost, cost, duration, is_upcoming,
     description, maps_iframe, itinerary_data,
-    // New fields
-    rating, reviews_count, categories, features, gallery_images,
-    start_date, total_seats, booked_seats, badge, pdfUrl
-  } = req.body;
-
-  // Basic validation (add more as needed)
-  if (!name || !title || !itinerary_data) {
-    return res.status(400).json({ message: 'Missing required trip fields (name, title, itinerary_data)' });
-  }
-
-  const sql = `INSERT INTO trips (
-                 name, distance, card_img, info_img, title, card_subtitle, subtitle,
-                 original_cost, cost, duration, is_upcoming, description,
-                 rating, reviews_count, categories, features, gallery_images,
-                 maps_iframe, itinerary_data,
-                 start_date, total_seats, booked_seats, badge, pdfUrl
-               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-  
-  // Stringify JSON fields for storage
-  const itineraryJson = safeJsonStringify(itinerary_data, '[]');
-  const categoriesJson = safeJsonStringify(categories, '[]');
-  const featuresJson = safeJsonStringify(features, '[]');
-  const galleryImagesJson = safeJsonStringify(gallery_images, '[]');
-
-  const params = [
-    name, distance, card_img, info_img, title, card_subtitle,
-    subtitle, original_cost, cost, duration, is_upcoming ? 1 : 0, // Convert boolean to integer
-    description,
-    rating, reviews_count, categoriesJson, featuresJson, galleryImagesJson,
-    maps_iframe, itineraryJson,
-    start_date, total_seats, booked_seats, badge, pdfUrl
-  ];
-
-  db.run(sql, params, function(err) { // Use function() to get access to this.lastID
-    if (err) {
-      console.error('Error creating trip:', err.message);
-      return res.status(500).json({ message: 'Error creating trip' });
-    }
-    console.log(`New trip created with ID: ${this.lastID}`);
-    res.status(201).json({ message: 'Trip created successfully', id: this.lastID });
-  });
-});
-
-// PUT /api/trips/:id - Update an existing trip
-router.put('/:id', (req, res) => {
-  const { id } = req.params;
-  const {
-    name, distance, card_img, info_img, title, card_subtitle,
-    subtitle, original_cost, cost, duration, is_upcoming,
-    description, maps_iframe, itinerary_data,
-    // New fields
-    rating, reviews_count, categories, features, gallery_images,
+    rating, reviews_count, features,
     start_date, total_seats, booked_seats, badge, pdfUrl
   } = req.body;
 
   // Basic validation
-  if (!name || !title || !itinerary_data) {
-    return res.status(400).json({ message: 'Missing required trip fields (name, title, itinerary_data)' });
+  if (!location_name || !title || !itinerary_data) {
+    return res.status(400).json({ message: 'Missing required trip fields (location_name, title, itinerary_data)' });
   }
 
-  const sql = `UPDATE trips SET
-                 name = ?,
-                 distance = ?,
-                 card_img = ?,
-                 info_img = ?,
-                 title = ?,
-                 card_subtitle = ?,
-                 subtitle = ?,
-                 original_cost = ?,
-                 cost = ?,
-                 duration = ?,
-                 is_upcoming = ?,
-                 description = ?,
-                 rating = ?,
-                 reviews_count = ?,
-                 categories = ?,
-                 features = ?,
-                 gallery_images = ?,
-                 maps_iframe = ?,
-                 itinerary_data = ?,
-                 start_date = ?,
-                 total_seats = ?,
-                 booked_seats = ?,
-                 badge = ?,
-                 pdfUrl = ?
-               WHERE id = ?`;
+  try {
+    const { data, error } = await supabase
+      .from('trips')
+      .insert([{
+        location_name,
+        distance,
+        card_img,
+        info_img,
+        title,
+        card_subtitle,
+        subtitle,
+        original_cost,
+        cost,
+        duration,
+        is_upcoming,
+        description,
+        rating,
+        reviews_count,
+        features, // Supabase will store this as JSONB
+        start_date,
+        total_seats,
+        booked_seats,
+        badge,
+        maps_iframe,
+        itinerary_data, // Supabase will store this as JSONB
+        pdfUrl
+      }])
+      .select();
+    
+    if (error) throw error;
+    
+    console.log(`New trip created with ID: ${data[0].id}`);
+    res.status(201).json({ message: 'Trip created successfully', id: data[0].id });
+  } catch (err) {
+    console.error('Error creating trip:', err.message);
+    res.status(500).json({ message: 'Error creating trip' });
+  }
+});
 
-  const itineraryJson = safeJsonStringify(itinerary_data, '[]');
-  const categoriesJson = safeJsonStringify(categories, '[]');
-  const featuresJson = safeJsonStringify(features, '[]');
-  const galleryImagesJson = safeJsonStringify(gallery_images, '[]');
+// PUT /api/trips/:id - Update an existing trip
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    location_name, distance, card_img, info_img, title, card_subtitle,
+    subtitle, original_cost, cost, duration, is_upcoming,
+    description, maps_iframe, itinerary_data,
+    rating, reviews_count, features,
+    start_date, total_seats, booked_seats, badge, pdfUrl
+  } = req.body;
 
-  const params = [
-    name, distance, card_img, info_img, title, card_subtitle,
-    subtitle, original_cost, cost, duration, is_upcoming ? 1 : 0,
-    description,
-    rating, reviews_count, categoriesJson, featuresJson, galleryImagesJson,
-    maps_iframe, itineraryJson,
-    start_date, total_seats, booked_seats, badge, pdfUrl,
-    id // For the WHERE clause
-  ];
+  // Basic validation
+  if (!location_name || !title || !itinerary_data) {
+    return res.status(400).json({ message: 'Missing required trip fields (location_name, title, itinerary_data)' });
+  }
 
-  db.run(sql, params, function(err) {
-    if (err) {
-      console.error(`Error updating trip ${id}:`, err.message);
-      return res.status(500).json({ message: 'Error updating trip' });
+  try {
+    const { data, error } = await supabase
+      .from('trips')
+      .update({
+        location_name,
+        distance,
+        card_img,
+        info_img,
+        title,
+        card_subtitle,
+        subtitle,
+        original_cost,
+        cost,
+        duration,
+        is_upcoming,
+        description,
+        rating,
+        reviews_count,
+        features,
+        start_date,
+        total_seats,
+        booked_seats,
+        badge,
+        maps_iframe,
+        itinerary_data,
+        pdfUrl
+      })
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    
+    if (data.length === 0) {
+      return res.status(404).json({ message: 'Trip not found for update' });
     }
-    if (this.changes === 0) {
-         return res.status(404).json({ message: 'Trip not found for update' });
-    }
+    
     console.log(`Trip ${id} updated successfully.`);
     res.status(200).json({ message: 'Trip updated successfully' });
-  });
+  } catch (err) {
+    console.error(`Error updating trip ${id}:`, err.message);
+    res.status(500).json({ message: 'Error updating trip' });
+  }
 });
 
 // DELETE /api/trips/:id - Delete a trip
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const { id } = req.params;
-  db.run('DELETE FROM trips WHERE id = ?', [id], function(err) {
-    if (err) {
-      console.error(`Error deleting trip ${id}:`, err.message);
-      return res.status(500).json({ message: 'Error deleting trip' });
+  
+  try {
+    const { data, error } = await supabase
+      .from('trips')
+      .delete()
+      .eq('id', id)
+      .select();
+    
+    if (error) throw error;
+    
+    if (data.length === 0) {
+      return res.status(404).json({ message: 'Trip not found for deletion' });
     }
-    if (this.changes === 0) {
-        return res.status(404).json({ message: 'Trip not found for deletion' });
-    }
+    
     console.log(`Trip ${id} deleted successfully.`);
     res.status(200).json({ message: 'Trip deleted successfully' });
-  });
+  } catch (err) {
+    console.error(`Error deleting trip ${id}:`, err.message);
+    res.status(500).json({ message: 'Error deleting trip' });
+  }
 });
 
 module.exports = router;

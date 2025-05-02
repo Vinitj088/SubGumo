@@ -4,7 +4,7 @@ import TripForm from '../../components/Admin/TripForm'; // Import the form compo
 
 function AddTripPage() {
   const navigate = useNavigate();
-  const API_URL = 'http://localhost:3001/api'; // Backend URL
+  const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'; // Use environment variable if available
 
   const handleAddTrip = async (tripData) => {
     console.log('Submitting new trip:', tripData);

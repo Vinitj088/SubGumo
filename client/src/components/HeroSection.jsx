@@ -1,17 +1,13 @@
 import React, { useState } from "react";
-import herobg from "./hero-bg.svg";
+// Removed: import herobg from "./hero-bg.svg";
 import HeroSectionImg from "../assets/HeroSectionImg.svg";
 // import HeroSectionVideo from "../assets/video.mp4";
 const HeroSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
-    <div className="relative top-14  w-full flex justify-center">
-      <img
-        src={herobg}
-        className="absolute md:top-0 md:left-0 w-full h-full z-0"
-        alt="Hero Background"
-      />
+    <div className="relative top-14 w-full flex justify-center bg-gradient-to-b from-white to-amber-50">
+      {/* Removed img tag for herobg */}
 
       <div className="z-10 container mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-start relative">
         <div className="flex flex-wrap items-center justify-between w-full py-8 md:py-12">

@@ -5,7 +5,7 @@ import TripForm from '../../components/Admin/TripForm';
 function EditTripPage() {
   const navigate = useNavigate();
   const { id } = useParams(); // Get trip ID from URL parameters
-  const API_URL = 'http://localhost:3001/api';
+  const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
   const [initialData, setInitialData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,7 @@ function EditTripPage() {
     };
 
     fetchTripData();
-  }, [id]); // Re-fetch if ID changes
+  }, [id, API_URL]); // Re-fetch if ID changes
 
   const handleUpdateTrip = async (tripData) => {
     console.log(`Updating trip ${id}:`, tripData);

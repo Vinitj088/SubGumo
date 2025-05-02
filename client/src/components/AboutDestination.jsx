@@ -191,9 +191,6 @@ export default function AboutDestination() {
     );
   }
 
-  // Categories
-  const categories = trip?.categories || ["Natural Beauty", "Adventure", "Culture", "Spiritual", "Handicrafts", "Nature Reserves"];
-
   // Image Carousel images from gallery_images or fallbacks
   const carouselImages = 
     trip && trip.gallery_images && trip.gallery_images.length > 0
@@ -276,7 +273,7 @@ export default function AboutDestination() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-16 md:pb-0">
+    <div className="bg-white min-h-screen pb-16 md:pb-0">
       <div className="container mx-auto px-4 pt-20 md:pt-24 pb-12">
 
         {/* Back Button (making it more prominent and ensuring it's not hidden) */}
@@ -425,7 +422,7 @@ export default function AboutDestination() {
             {/* Location */}
             <div className="flex items-center text-gray-600 text-sm">
               <MapPin className="w-4 h-4 mr-1 text-blue-600" />
-              <span>{trip.name}</span>
+              <span>{trip.location_name || trip.name}</span>
             </div>
           </div>
 
@@ -454,25 +451,6 @@ export default function AboutDestination() {
               </span>
             )}
           </Button>
-        </div>
-
-        {/* Categories/Tags */} 
-        <div className="flex flex-wrap gap-2 mb-6">
-          {trip.categories && trip.categories.length > 0 ? (
-            trip.categories.map((tag, index) => {
-              return (
-                <Badge
-                  key={index}
-                  className="bg-gray-100 text-gray-600"
-                >
-                  <Info className="w-4 h-4 mr-1" /> {/* Placeholder Icon */}
-                  {tag}
-                </Badge>
-              );
-            })
-          ) : (
-            <span className="text-sm text-gray-500">No categories specified.</span>
-          )}
         </div>
 
         {/* Main Content */}
@@ -537,10 +515,12 @@ export default function AboutDestination() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-gray-800">
                   {trip.features && trip.features.length > 0 ? (
                     trip.features.map((feature, index) => {
+                      // Handle both string format and object format
+                      const featureText = typeof feature === 'string' ? feature : feature.text;
                       return (
                         <div key={index} className="flex items-center text-sm">
-                          <Info className="w-5 h-5 text-blue-600 mr-2" /> {/* Placeholder Icon */}
-                          <span>{feature.text}</span>
+                          <Check className="w-5 h-5 text-blue-600 mr-2" />
+                          <span>{featureText}</span>
                         </div>
                       );
                     })

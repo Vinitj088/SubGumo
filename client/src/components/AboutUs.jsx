@@ -5,7 +5,7 @@ const AboutUs = () => {
   const teamMembers = [
     {
       name: "Mr. Ravi ",
-      role: "Trip Planner & Organizer",
+      role: "Founder",
       bio: "8+ years exploring hidden gems across India"
     },
 

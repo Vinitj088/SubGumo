@@ -70,7 +70,7 @@ const DestinationsPage = () => {
   return (
     // Changed from <section> to <div> for a page context
     // Added padding top for navbar space, adjust as needed
-    <div className="py-24 md:py-36 pb-16 md:pb-24 bg-gradient-to-b from-teal-50 via-cyan-50 to-sky-50 min-h-screen">
+    <div className="py-24 md:py-36 pb-16 md:pb-24 bg-gradient-to-b from-white to-amber-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Heading Section - Adjusted for Page Context */}
         <div className="text-center mb-12 md:mb-16">
@@ -90,7 +90,7 @@ const DestinationsPage = () => {
                 key={index}
                 className={`px-5 py-2 rounded-md text-sm font-medium transition-all duration-200 ${ 
                   active === index
-                    ? "bg-cyan-600 text-white shadow-md"
+                    ? "bg-orange-600 text-white shadow-md"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
                 onClick={() => setActive(index)}
@@ -102,7 +102,7 @@ const DestinationsPage = () => {
         </div>
 
         {/* Loading and Error States */}
-        {loading && <div className="text-center py-10 text-lg font-medium text-cyan-700">Loading destinations...</div>}
+        {loading && <div className="text-center py-10 text-lg font-medium text-amber-700">Loading destinations...</div>}
         {error && <div className="text-center py-10 text-red-600 bg-red-100 p-4 rounded-lg">Error: {error}</div>}
 
         {/* Destination Cards Grid */}
@@ -123,7 +123,7 @@ const DestinationsPage = () => {
 
                 return (
                   // --- Card JSX (copied from Destinations.jsx) --- 
-                  <div key={trip.id} className="relative rounded-xl shadow-lg overflow-hidden transition-all duration-300 border border-transparent hover:border-cyan-200 hover:shadow-cyan-100/50 bg-white">
+                  <div key={trip.id} className="relative rounded-xl shadow-lg overflow-hidden transition-all duration-300 border border-transparent hover:border-amber-200 hover:shadow-amber-100/50 bg-white">
                     {/* Image */}
                     <img 
                       src={trip.card_img || '/placeholder-image.png'}
@@ -134,7 +134,7 @@ const DestinationsPage = () => {
                     {/* Badges Area */}
                     <div className="absolute top-3 left-3 right-3 flex flex-wrap gap-1.5 z-10">
                       {trip.badge ? (
-                        <span className="bg-cyan-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm">{trip.badge}</span>
+                        <span className="bg-orange-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm">{trip.badge}</span>
                       ) : null}
                       {trip.is_upcoming ? (
                         <span className="bg-amber-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm">Coming Soon</span>
@@ -158,14 +158,14 @@ const DestinationsPage = () => {
                       <div className="pt-3 border-t border-gray-100">
                         <div className="flex justify-between items-end mb-3">
                           <div className="flex items-center gap-1.5 text-sm text-gray-700">
-                            <CalendarDays className="w-4 h-4 text-cyan-600 flex-shrink-0" strokeWidth={2} />
+                            <CalendarDays className="w-4 h-4 text-orange-600 flex-shrink-0" strokeWidth={2} />
                             <span className="truncate">{trip.duration}</span>
                           </div>
                           <div className="text-right flex-shrink-0 pl-2">
                             {originalCost > 0 && originalCost > finalCost && (
                               <div className="text-xs text-gray-500 line-through">₹{originalCost.toLocaleString()}</div>
                             )}
-                            <div className="text-lg font-bold text-cyan-700">₹{finalCost ? finalCost.toLocaleString() : 'N/A'}</div>
+                            <div className="text-lg font-bold text-orange-700">₹{finalCost ? finalCost.toLocaleString() : 'N/A'}</div>
                             {savings !== null && percentage !== null && (
                               <div className="text-xs font-medium text-green-600 mt-0.5">Save ₹{savings.toLocaleString()} ({percentage}%)</div>
                             )}

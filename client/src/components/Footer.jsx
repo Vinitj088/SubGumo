@@ -2,10 +2,26 @@ import React from "react";
 import { IoLogoWhatsapp } from "react-icons/io5";
 import { FaInstagram } from "react-icons/fa";
 import { FileText, Shield, Copyright } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { cn } from "@/lib/utils";
 
 export const Footer = () => {
+  const location = useLocation();
+
+  const isDestinationPage = location.pathname.startsWith('/destination/') && location.pathname.split('/').length > 2;
+  const isPrivacyPage = location.pathname === '/privacy';
+  const isAdminPage = location.pathname.startsWith('/admin');
+  const isAboutPage = location.pathname === '/about';
+
   return (
-    <footer className="bg-white text-white py-16">
+    <footer 
+      className={cn(
+        "text-white py-16",
+        isDestinationPage || isPrivacyPage || isAdminPage || isAboutPage
+          ? "bg-white"
+          : "bg-gradient-to-b from-amber-50 to-white"
+      )}
+    >
       <div className="max-w-7xl text-black mx-auto px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Column 1: Logo and Company Info */}
@@ -17,7 +33,7 @@ export const Footer = () => {
             <div className="flex items-center space-x-2 text-gray-700">
               <Copyright className="w-4 h-4" />
               <p className="text-sm md:text-base">
-                2023 Sabgumo. All rights reserved.
+                2025 Sabgumo. All rights reserved.
               </p>
             </div>
           </div>
@@ -73,7 +89,7 @@ export const Footer = () => {
               <li className="flex items-center space-x-2">
                 <Shield className="w-4 h-4 text-gray-700" />
                 <a
-                  href="#privacy"
+                  href="/privacy"
                   className="text-gray-700 hover:text-blue-600 transition duration-300 text-sm md:text-base"
                 >
                   Privacy Policy

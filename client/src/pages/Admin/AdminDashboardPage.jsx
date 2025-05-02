@@ -20,8 +20,10 @@ import {
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList, Label
 } from 'recharts';
-import { TrendingUp, Landmark, BookOpenCheck } from 'lucide-react';
+import { TrendingUp, Landmark, BookOpenCheck, BarChart2 } from 'lucide-react';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label as UILabel } from "@/components/ui/label";
 
 // Helper function to format dates for charts
 const formatDate = (dateString) => {
@@ -46,6 +48,7 @@ function AdminDashboardPage() {
   const [inquiries, setInquiries] = useState([]);
   const [inquiriesLoading, setInquiriesLoading] = useState(true);
   const [inquiriesError, setInquiriesError] = useState('');
+  const [updatingInquiryId, setUpdatingInquiryId] = useState(null);
 
   const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
 
@@ -160,6 +163,41 @@ function AdminDashboardPage() {
       .slice(0, 5);
   }, [inquiries, inquiriesLoading, inquiriesError]);
 
+  // --- NEW: Handle Inquiry Status Change ---
+  const handleStatusChange = async (inquiryId, isCompleted) => {
+    setUpdatingInquiryId(inquiryId);
+    setInquiriesError('');
+    console.log(`Updating inquiry ${inquiryId} status to: ${isCompleted ? 'Completed' : 'Pending'}`);
+
+    try {
+      const response = await fetch(`${API_URL}/inquiries/${inquiryId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ is_completed: isCompleted }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to update inquiry status');
+      }
+
+      setInquiries(prevInquiries => 
+        prevInquiries.map(inq => 
+          inq.id === inquiryId ? { ...inq, is_completed: isCompleted } : inq
+        )
+      );
+
+    } catch (err) {
+      console.error("Update inquiry status error:", err);
+      setInquiriesError(`Failed to update status for inquiry ${inquiryId}: ${err.message}`);
+    } finally {
+      setUpdatingInquiryId(null);
+    }
+  };
+  // --- END NEW --- 
+
   // Render the trip management section using Shadcn
   const renderTripManagement = () => {
     if (tripsLoading) return <p>Loading trips...</p>; // Replace with Skeleton later?
@@ -237,30 +275,54 @@ function AdminDashboardPage() {
                   <TableHead>Email</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Destination</TableHead>
+                  <TableHead className="w-[100px]">Status</TableHead>
                   <TableHead>Message</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {inquiries.map((inquiry) => (
-                  <TableRow key={inquiry.id}>
-                    <TableCell className="font-medium">{inquiry.id}</TableCell>
-                    <TableCell className="whitespace-nowrap">{inquiry.received_at}</TableCell>
-                    <TableCell>{inquiry.name}</TableCell>
-                    <TableCell>
-                      <a href={`mailto:${inquiry.email}`} className="text-blue-600 hover:underline">
-                        {inquiry.email}
-                      </a>
-                    </TableCell>
-                    <TableCell>{inquiry.phone || 'N/A'}</TableCell>
-                    <TableCell>{inquiry.destination}</TableCell>
-                    <TableCell className="max-w-xs whitespace-pre-wrap break-words">
-                      {inquiry.message || 'N/A'}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {inquiries.map((inquiry) => {
+                  const isLoading = updatingInquiryId === inquiry.id;
+                  return (
+                    <TableRow key={inquiry.id}>
+                      <TableCell className="font-medium">{inquiry.id}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {inquiry.received_at ? new Date(inquiry.received_at).toLocaleString() : 'N/A'}
+                      </TableCell>
+                      <TableCell>{inquiry.name}</TableCell>
+                      <TableCell>
+                        <a href={`mailto:${inquiry.email}`} className="text-blue-600 hover:underline">
+                          {inquiry.email}
+                        </a>
+                      </TableCell>
+                      <TableCell>{inquiry.phone || 'N/A'}</TableCell>
+                      <TableCell>{inquiry.destination || 'N/A'}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                           <Checkbox 
+                              id={`status-${inquiry.id}`}
+                              checked={!!inquiry.is_completed}
+                              onCheckedChange={(checked) => handleStatusChange(inquiry.id, !!checked)}
+                              disabled={isLoading}
+                              aria-label={isLoading ? "Updating status" : (inquiry.is_completed ? "Mark as pending" : "Mark as completed")} 
+                           />
+                           <UILabel 
+                             htmlFor={`status-${inquiry.id}`} 
+                             className={`text-xs ${isLoading ? 'text-gray-400' : inquiry.is_completed ? 'text-green-600' : 'text-orange-600'}`}
+                           >
+                             {isLoading ? 'Saving...' : inquiry.is_completed ? 'Completed' : 'Pending'}
+                           </UILabel>
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-xs whitespace-pre-wrap break-words">
+                        {inquiry.message || 'N/A'}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
+          {inquiriesError && !inquiriesError.includes('loading') && <p className="text-red-500 mt-4 text-sm">{inquiriesError}</p>}
         </CardContent>
       </Card>
     );
@@ -268,9 +330,26 @@ function AdminDashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-24 md:py-36 min-h-screen"> {/* Adjusted padding */}
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Dashboard Overview</h1>
-        <Button variant="outline" onClick={handleLogout}>Logout</Button>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">Dashboard Overview</h1>
+        <div className="flex items-center gap-2 self-end sm:self-auto">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-1.5 px-2 sm:px-3 h-9" 
+            onClick={() => window.open('https://analytics.google.com/analytics/web/', '_blank')}
+            aria-label="Open Google Analytics"
+          >
+            <BarChart2 className="h-4 w-4" />
+            <span className="hidden xs:inline">Analytics</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 px-2 sm:px-3 h-9"
+          >
+            <span>Logout</span>
+          </Button>
+        </div>
       </div>
 
       {/* Stat Cards Row */}
