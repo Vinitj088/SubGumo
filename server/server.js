@@ -12,7 +12,27 @@ const app = express();
 const PORT = process.env.PORT || 3001; // Backend server port
 
 // Middleware
-app.use(cors()); // Allow requests from your React frontend (adjust origin in production)
+// Configure CORS for Vercel deployment
+const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    // Allow requests from specified origins
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    }
+    // Allow Vercel preview deployment URLs (if pattern is known/needed)
+    if (/--subgumo-2.*\.vercel\.app$/.test(origin)) { 
+        return callback(null, true);
+    }
+    // Otherwise, disallow
+    const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+    return callback(new Error(msg), false);
+  },
+  credentials: true, // Allow cookies if needed for auth sessions
+})); 
+
 app.use(express.json()); // Parse JSON request bodies
 app.use(fileUpload({
   useTempFiles: true,
@@ -184,7 +204,12 @@ app.patch('/api/inquiries/:id', async (req, res) => {
   }
 });
 
-// Start the server
+// Start the server - COMMENTED OUT FOR VERCEL
+/*
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
+*/
+
+// Export the app for Vercel
+module.exports = app;

@@ -191,7 +191,7 @@ const Destinations = () => {
             </div>
 
             {/* --- View All Button --- */}
-            {trips.length > 4 && ( // Show button only if there are more trips than shown
+            {trips.length > 4 && (
               <div className="text-center mt-12 md:mt-16">
                 <NavLink 
                   to="/destinations"
