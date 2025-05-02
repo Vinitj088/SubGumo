@@ -122,59 +122,90 @@ const DestinationsPage = () => {
                 }
 
                 return (
-                  // --- Card JSX (copied from Destinations.jsx) --- 
-                  <div key={trip.id} className="relative rounded-xl shadow-lg overflow-hidden transition-all duration-300 border border-transparent hover:border-amber-200 hover:shadow-amber-100/50 bg-white">
-                    {/* Image */}
-                    <img 
-                      src={trip.card_img || '/placeholder-image.png'}
-                      alt={trip.title} 
-                      className="w-full h-64 object-cover" // Slightly reduced height for more cards potentially
-                    />
-
-                    {/* Badges Area */}
-                    <div className="absolute top-3 left-3 right-3 flex flex-wrap gap-1.5 z-10">
-                      {trip.badge ? (
-                        <span className="bg-orange-600 text-white px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm">{trip.badge}</span>
-                      ) : null}
-                      {trip.is_upcoming ? (
-                        <span className="bg-amber-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm">Coming Soon</span>
-                      ) : null}
-                      {(daysLeft !== null && daysLeft >= 0 && !trip.is_upcoming) ? (
-                        <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm">{daysLeft === 0 ? "Starts Today!" : `${daysLeft} Day${daysLeft > 1 ? 's' : ''} Left!`}</span>
-                      ) : null}
-                      {(trip.total_seats > 0 && trip.remaining_seats !== null && trip.remaining_seats <= 10 && trip.remaining_seats > 0) ? (
-                        <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full text-xs font-semibold shadow-sm">Only {trip.remaining_seats} Spot{trip.remaining_seats > 1 ? 's' : ''} Left!</span>
-                      ) : null}
+                  // --- Card JSX (Using the new design from Destinations.jsx) --- 
+                  <div 
+                    key={trip.id} 
+                    className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 border border-gray-200 hover:shadow-cyan-100/50 flex flex-col"
+                  >
+                    {/* Image Area */}
+                    <div className="relative">
+                      <img 
+                        src={trip.card_img || '/placeholder-image.png'}
+                        alt={trip.title} 
+                        className="w-full h-60 object-cover" // Consistent image height
+                      />
                     </div>
-                    
-                    {/* Gradient Overlay - Removed for page view to make text clearer on white bg */}
-                    {/* <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent"></div> */}
-                    
-                    {/* Text Content - Adjusted for white background */}
-                    <div className="p-4">
+
+                    {/* Content Area - below the image */}
+                    <div className="p-5 flex flex-col flex-grow">
+                      {/* Badges Area - Top of content */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {/* Custom Badge - Using page theme colors */}
+                        {trip.badge ? (
+                          <span className="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            {trip.badge}
+                          </span>
+                        ) : null}
+                        {/* Upcoming Tour Badge */}
+                        {trip.is_upcoming ? (
+                          <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            Coming Soon
+                          </span>
+                        ) : null}
+                        {/* Days Left Badge */}
+                        {(daysLeft !== null && daysLeft >= 0 && !trip.is_upcoming) ? (
+                          <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            {daysLeft === 0 ? "Starts Today!" : `${daysLeft} Day${daysLeft > 1 ? 's' : ''} Left!`}
+                          </span>
+                        ) : null}
+                        {/* Limited Seats Badge */}
+                        {(trip.total_seats > 0 && trip.remaining_seats !== null && trip.remaining_seats <= 10 && trip.remaining_seats > 0) ? (
+                          <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            Only {trip.remaining_seats} Spot{trip.remaining_seats > 1 ? 's' : ''} Left!
+                          </span>
+                        ) : null}
+                      </div>
+
+                      {/* Title & Subtitle */}
                       <h4 className="text-lg font-bold mb-1 text-gray-900 line-clamp-2">{trip.title}</h4>
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-1">{trip.card_subtitle}</p>
+                      <p className="text-sm text-gray-600 mb-4 line-clamp-1">{trip.card_subtitle}</p>
                       
-                      <div className="pt-3 border-t border-gray-100">
-                        <div className="flex justify-between items-end mb-3">
+                      {/* Spacer to push content below to bottom */}
+                      <div className="flex-grow"></div> 
+
+                      {/* Details Section (Duration, Pricing) */}  
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <div className="flex justify-between items-center mb-4">
+                          {/* Duration */}
                           <div className="flex items-center gap-1.5 text-sm text-gray-700">
+                            {/* Using orange icon consistent with page theme */}
                             <CalendarDays className="w-4 h-4 text-orange-600 flex-shrink-0" strokeWidth={2} />
-                            <span className="truncate">{trip.duration}</span>
+                            <span>{trip.duration}</span>
                           </div>
-                          <div className="text-right flex-shrink-0 pl-2">
+
+                          {/* Pricing Block - Using orange theme */}
+                          <div className="text-right flex-shrink-0 pl-3">
                             {originalCost > 0 && originalCost > finalCost && (
-                              <div className="text-xs text-gray-500 line-through">₹{originalCost.toLocaleString()}</div>
+                              <div className="text-xs text-gray-500 line-through">
+                                ₹{originalCost.toLocaleString()}
+                              </div>
                             )}
-                            <div className="text-lg font-bold text-orange-700">₹{finalCost ? finalCost.toLocaleString() : 'N/A'}</div>
+                            <div className="text-lg font-bold text-orange-700">
+                              ₹{finalCost ? finalCost.toLocaleString() : 'N/A'}
+                            </div>
                             {savings !== null && percentage !== null && (
-                              <div className="text-xs font-medium text-green-600 mt-0.5">Save ₹{savings.toLocaleString()} ({percentage}%)</div>
+                              <div className="text-xs font-medium text-green-600 mt-0.5">
+                                Save ₹{savings.toLocaleString()} ({percentage}%)
+                              </div>
                             )}
                           </div>
                         </div>
+
+                        {/* View Details Button - Using page theme */}
                         <NavLink 
-                          to={trip.is_upcoming ? "#" : `/destination/${trip.id}`}
-                          className={`mt-2 block w-full px-4 py-2 bg-amber-400 text-black text-sm font-semibold rounded-full hover:bg-amber-300 transition-colors text-center ${trip.is_upcoming ? 'opacity-70 cursor-not-allowed' : ''}`}
-                          onClick={(e) => trip.is_upcoming && e.preventDefault()}
+                          to={trip.is_upcoming ? "#" : `/destination/${trip.id}`} // Disable link for upcoming
+                          className={`block w-full px-5 py-2.5 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-600 transition-colors text-center ${trip.is_upcoming ? 'opacity-70 cursor-not-allowed' : ''}`}
+                          onClick={(e) => trip.is_upcoming && e.preventDefault()} // Prevent navigation for upcoming
                         >
                           {trip.is_upcoming ? 'Details Coming Soon' : 'View Details'}
                         </NavLink>

@@ -59,7 +59,7 @@ const LocationCard = ({ destination }) => {
     <Card>
       <CardHeader><CardTitle>Location</CardTitle></CardHeader>
       <CardContent>
-        <p className="mb-2">{destination?.name || 'Location details unavailable.'}</p>
+        <p className="mb-2">{destination?.location_name || 'Location details unavailable.'}</p>
         {destination?.maps_iframe ? (
           <div className="aspect-video overflow-hidden rounded-md">
             <iframe 
@@ -422,7 +422,7 @@ export default function AboutDestination() {
             {/* Location */}
             <div className="flex items-center text-gray-600 text-sm">
               <MapPin className="w-4 h-4 mr-1 text-blue-600" />
-              <span>{trip.location_name || trip.name}</span>
+              <span>{trip.location_name}</span>
             </div>
           </div>
 

@@ -94,72 +94,78 @@ const Destinations = () => {
                   }
 
                   return (
-                    <div key={trip.id} className="relative rounded-xl shadow-lg overflow-hidden transition-all duration-300 border border-transparent hover:border-cyan-200 hover:shadow-cyan-100/50">
-                      {/* Image */}
-                      <img 
-                        src={trip.card_img || '/placeholder-image.png'}
-                        alt={trip.title} 
-                        className="w-full h-80 sm:h-96 object-cover" // Adjusted height slightly
-                      />
-
-                      {/* --- Badges Area (Top) --- */}
-                      <div className="absolute top-3 left-3 right-3 flex flex-wrap gap-2 z-10">
-                        {/* Custom Badge */}
-                        {trip.badge ? (
-                          <span className="bg-cyan-600 text-white px-2.5 py-0.5 rounded-full text-xs font-semibold shadow-sm">
-                            {trip.badge}
-                          </span>
-                        ) : null}
-                        {/* Upcoming Tour Badge */}
-                        {trip.is_upcoming ? (
-                          <span className="bg-amber-500 text-white px-2.5 py-0.5 rounded-full text-xs font-semibold shadow-sm">
-                            Coming Soon
-                          </span>
-                        ) : null}
-                        {/* Days Left Badge */}
-                        {(daysLeft !== null && daysLeft >= 0 && !trip.is_upcoming) ? (
-                          <span className="bg-blue-100 text-blue-700 px-2.5 py-0.5 rounded-full text-xs font-semibold shadow-sm">
-                            {daysLeft === 0 ? "Starts Today!" : `${daysLeft} Day${daysLeft > 1 ? 's' : ''} Left!`}
-                          </span>
-                        ) : null}
-                        {/* Limited Seats Badge */}
-                        {(trip.total_seats > 0 && trip.remaining_seats !== null && trip.remaining_seats <= 10 && trip.remaining_seats > 0) ? (
-                          <span className="bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full text-xs font-semibold shadow-sm">
-                            Only {trip.remaining_seats} Spot{trip.remaining_seats > 1 ? 's' : ''} Left!
-                          </span>
-                        ) : null}
+                    // Card Wrapper - includes image and content area
+                    <div 
+                      key={trip.id} 
+                      className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 border border-gray-200 hover:shadow-cyan-100/50 flex flex-col"
+                    >
+                      {/* Image Area */}
+                      <div className="relative">
+                        <img 
+                          src={trip.card_img || '/placeholder-image.png'}
+                          alt={trip.title} 
+                          className="w-full h-60 object-cover" // Adjusted image height
+                        />
                       </div>
-                      
-                      {/* --- Gradient Overlay --- */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent"></div>
-                      
-                      {/* --- Text Content (Bottom - Always Visible) --- */}
-                      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5 text-white"> 
+
+                      {/* Content Area - below the image */}
+                      <div className="p-5 flex flex-col flex-grow">
+                        {/* Badges Area - Top of content */}
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {/* Custom Badge */}
+                          {trip.badge ? (
+                            <span className="bg-cyan-100 text-cyan-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              {trip.badge}
+                            </span>
+                          ) : null}
+                          {/* Upcoming Tour Badge */}
+                          {trip.is_upcoming ? (
+                            <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Coming Soon
+                            </span>
+                          ) : null}
+                          {/* Days Left Badge */}
+                          {(daysLeft !== null && daysLeft >= 0 && !trip.is_upcoming) ? (
+                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              {daysLeft === 0 ? "Starts Today!" : `${daysLeft} Day${daysLeft > 1 ? 's' : ''} Left!`}
+                            </span>
+                          ) : null}
+                          {/* Limited Seats Badge */}
+                          {(trip.total_seats > 0 && trip.remaining_seats !== null && trip.remaining_seats <= 10 && trip.remaining_seats > 0) ? (
+                            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                              Only {trip.remaining_seats} Spot{trip.remaining_seats > 1 ? 's' : ''} Left!
+                            </span>
+                          ) : null}
+                        </div>
+
                         {/* Title & Subtitle */}
-                        <h4 className="text-lg md:text-xl lg:text-2xl font-bold mb-1 drop-shadow-md line-clamp-2">{trip.title}</h4>
-                        <p className="text-sm text-gray-200 mb-3 drop-shadow-sm line-clamp-1">{trip.card_subtitle}</p>
+                        <h4 className="text-lg font-bold mb-1 text-gray-900 line-clamp-2">{trip.title}</h4>
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-1">{trip.card_subtitle}</p>
                         
-                        {/* Details Section (Duration, Pricing) */}
-                        <div className="pt-3 border-t border-white/20">
-                          <div className="flex justify-between items-end mb-3">
+                        {/* Spacer to push content below to bottom */}
+                        <div className="flex-grow"></div> 
+
+                        {/* Details Section (Duration, Pricing) */}  
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                          <div className="flex justify-between items-center mb-4">
                             {/* Duration */}
-                            <div className="flex items-center gap-1.5 text-sm opacity-90">
-                              <CalendarDays className="w-4 h-4 text-amber-300 flex-shrink-0" strokeWidth={2} />
-                              <span className="truncate">{trip.duration}</span>
+                            <div className="flex items-center gap-1.5 text-sm text-gray-700">
+                              <CalendarDays className="w-4 h-4 text-cyan-600 flex-shrink-0" strokeWidth={2} />
+                              <span>{trip.duration}</span>
                             </div>
 
                             {/* Pricing Block */}
-                            <div className="text-right flex-shrink-0 pl-2">
+                            <div className="text-right flex-shrink-0 pl-3">
                               {originalCost > 0 && originalCost > finalCost && (
-                                <div className="text-xs text-gray-300 line-through">
+                                <div className="text-xs text-gray-500 line-through">
                                   ₹{originalCost.toLocaleString()}
                                 </div>
                               )}
-                              <div className="text-xl font-bold text-amber-300">
+                              <div className="text-lg font-bold text-cyan-700">
                                 ₹{finalCost ? finalCost.toLocaleString() : 'N/A'}
                               </div>
                               {savings !== null && percentage !== null && (
-                                <div className="text-xs font-medium text-green-400 mt-0.5">
+                                <div className="text-xs font-medium text-green-600 mt-0.5">
                                   Save ₹{savings.toLocaleString()} ({percentage}%)
                                 </div>
                               )}
@@ -169,7 +175,7 @@ const Destinations = () => {
                           {/* View Details Button */}
                           <NavLink 
                             to={trip.is_upcoming ? "#" : `/destination/${trip.id}`} // Disable link for upcoming
-                            className={`mt-2 inline-block w-full px-4 py-2 bg-amber-400 text-black text-sm font-semibold rounded-full hover:bg-amber-300 transition-colors text-center ${trip.is_upcoming ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`block w-full px-5 py-2.5 bg-amber-500 text-white text-sm font-semibold rounded-lg hover:bg-amber-600 transition-colors text-center ${trip.is_upcoming ? 'opacity-70 cursor-not-allowed' : ''}`}
                             onClick={(e) => trip.is_upcoming && e.preventDefault()} // Prevent navigation for upcoming
                           >
                             {trip.is_upcoming ? 'Details Coming Soon' : 'View Details'}
@@ -184,7 +190,7 @@ const Destinations = () => {
               )}
             </div>
 
-            {/* --- View All Button --- */} 
+            {/* --- View All Button --- */}
             {trips.length > 4 && ( // Show button only if there are more trips than shown
               <div className="text-center mt-12 md:mt-16">
                 <NavLink 

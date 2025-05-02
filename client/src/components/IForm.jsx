@@ -95,7 +95,7 @@ const IForm = () => {
 
   return (
     // Use a gradient background similar to other sections
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-amber-50 to-yellow-50 py-12 pt-24 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-white to-amber-50 py-12 pt-24 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Plan Your Next Adventure</h1>
