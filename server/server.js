@@ -18,14 +18,18 @@ app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    // Allow requests from specified origins
-    if (allowedOrigins.indexOf(origin) !== -1) {
+
+    // Allow requests from specified origins in CORS_ORIGIN
+    if (allowedOrigins.length > 0 && allowedOrigins.indexOf(origin) !== -1) {
       return callback(null, true);
     }
-    // Allow Vercel preview deployment URLs (if pattern is known/needed)
-    if (/--subgumo-2.*\.vercel\.app$/.test(origin)) { 
+
+    // Allow requests from any Vercel deployment URL (includes production and previews)
+    // Use a broader regex to match various Vercel URL formats
+    if (/\.vercel\.app$/.test(origin)) { 
         return callback(null, true);
     }
+
     // Otherwise, disallow
     const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
     return callback(new Error(msg), false);
